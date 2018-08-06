@@ -1,9 +1,14 @@
+This is going to be a little past, a little present, and a little future.  We're
+still figuring out a properly "julian" way of doing this.
+
 # Why?
 
-What's the reason this exists? Lots of data comes in **tabular form**:
-heterogeneously typed, often categorical.
+Lots of data comes in **tabular form**: heterogeneously typed, often
+categorical.  Need to get that into a form that's consumable by computational
+models.
 
-motivating example:
+motivating example: lexdec? need something with multiple predictors?  or just
+make something up?  like reading times for nouns/verbs/adjectives etc.
 
 ## Regression modeling
 
@@ -13,18 +18,33 @@ Invert design matrix...but where does design matrix come from?
 
 # What?
 
-**Organization** and **transformation** of data from tabular data sources for
-modeling.
+**Organize** and **transform** data from tabular data sources for modeling.
 
-Organization: separate predictors (independent) from outcome (dependent)
-variables.
+## Organize
 
-Transform: change to numeric matrix, convert categorical data to some kind of
-numeric representation (one-hot, contrast coding, etc.).
+* `y ~ a` separate predictors (independent) from outcome (dependent) variables. 
+* `y ~ a + b` combine multiple variables
+
+## Transform
+
+* change to numeric matrix/vector, convert categorical data to some kind of
+  numeric representation (one-hot, contrast coding, etc.).
+* `y ~ a + b + a&b` create "interaction" terms: how much does effect of `a`
+  depend on `b`?
+* `y ~ a*b`
+* `y ~ a*b + (1+a|c)` other custom, domain-specific transformations
+
+# (Some history)
+
+Based on R/S-plus formulae....that's about all I know
+
+Doug Bates, juliacon...2016? 2015?
+
+Initial versions were in DataFrames.  Now live in StatsModels.
 
 # How?
 
-Start with `@formula` macro.  This takes a "formula expression" and
+Starts with `@formula` macro.  This takes a "formula expression" and
 
 1. Re-writes expression according to DSL rules,
 2. Wrap symbols in `Term`s for special calls, and
@@ -40,9 +60,9 @@ example of that later.
 
 Next: we generate a schema from the combination of the resulting `Term`s and a
 data source (which we abstract as a `NamedTuple` of columns).  The basic schema
-is just a Dict mapping each Term to a continuous or categorical term type.
-Inspired by `JuliaDB.ML` you can override the defaults by providing a Dict of
-"hints".
+is just a Dict that maps each Term to its type: categorical or continuous
+Inspired by `JuliaDB.ML` you can override the defaults by providing "hints" in a
+Dict.
 
 With a schema in hand the last step is to _apply_ it to our formula.  As a
 baseline this just replaces each un-typed `Term` with its entry from the
@@ -51,19 +71,28 @@ schema.
 (discuss contrast coding here??)
 
 But the default behavior is more sophisticated: it tries to detect when
-the model matrix you generate is going to be less than full rank and fix it.
-
-
-
-## Syntactic transformations of formula expression
-
-Apply special syntax rules (* expansion) and create anonymous functions for
-un-handled function calls.
-
-## Generating **Term**s from data schema
-
-Need types and other summaries (unique values)
+the model matrix you generate is going to be less than full rank and fix it.  
 
 # Extending
 
-So how do you build on this?  
+An important strength of julia is that it doesn't force you into a single way of
+doing things.  Goal is to write code that's sufficiently generic to be useful in
+many contexts and easily "play well" with others.
+
+* NamedTuples (support anything that supports DataStreams/IterableTables)
+* Fast anonymous functions (mix in normal julia code to formulae)
+* Multiple dispatch/generic functions (Add functionality by dispatching on
+  `Term`s, schema wrappers, etc.)
+  
+## New Terms: random effects
+
+```julia
+
+StatsModels.is_special(Val(:|)) = true
+Base.|(lhs::TermOrTuple, rhs::Term) = RanefTerm(lhs, rhs) # placeholder
+
+
+```
+
+## MNIST (categorical response, image array data)
+
