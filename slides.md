@@ -292,8 +292,8 @@ Dict{Any,Any} with 3 entries:
 A schema applied to a formula replaces `Term`s with their schema entries:
 
 ```julia
-julia> apply_schema(@formula(y ~ 1 + a*b), schema(d))
-y (continuous) ~ 1 + a (continuous) + b (categorical(2): DummyCoding) + a (continuous)&b (categorical(2): DummyCoding)
+julia> apply_schema(@formula(y ~ 1 + a + b), schema(d))
+y (continuous) ~ 1 + a (continuous) + b (categorical(2): DummyCoding)
 ```
 
 --
@@ -302,11 +302,11 @@ Schema "wrappers" allow smarter application of schemas (e.g. detect and repair
 rank-deficient model matrices)
 
 ```julia
-julia> apply_schema(@formula(y ~ a + a&b), FullRank(schema(d)))
-y (continuous) ~ a (continuous) + a (continuous)&b (categorical(2): DummyCoding)
+julia> apply_schema(@formula(y ~ 1 + b), FullRank(schema(d)))
+y (continuous) ~ 1 + b (categorical(2): DummyCoding)
 
-julia> apply_schema(@formula(y ~ a&b), FullRank(schema(d)))
-y (continuous) ~ a (continuous)&b (categorical(3): StatsModels.FullDummyCoding)
+julia> apply_schema(@formula(y ~ b), FullRank(schema(d)))
+y (continuous) ~ b (categorical(3): StatsModels.FullDummyCoding)
 ```
 
 ---
