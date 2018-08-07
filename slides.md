@@ -311,4 +311,143 @@ y (continuous) ~ b (categorical(3): StatsModels.FullDummyCoding)
 
 ---
 
-## Generate model matrix
+<!-- TODO: color-code terms and columns? -->
+# Data time
+
+Any `<:AbstractTerm` can general model columns from a table:
+
+```julia
+f = apply_schema(@formula(y ~ 1 + a), schema(d))
+# right-hand side:
+last(model_cols(f, d))
+```
+
+--
+
+.pull-left[
+```
+│ Row │ y        │ a │ b │
+├─────┼──────────┼───┼───┤
+│ 1   │ 0.946488 │ 1 │ b │
+│ 2   │ 0.658707 │ 3 │ b │
+│ 3   │ 0.53838  │ 2 │ a │
+│ 4   │ 0.639199 │ 3 │ c │
+│ 5   │ 0.395238 │ 1 │ b │
+│ 6   │ 0.212491 │ 1 │ a │
+│ 7   │ 0.902297 │ 2 │ a │
+│ 8   │ 0.199278 │ 2 │ a │
+│ 9   │ 0.942253 │ 3 │ c │
+│ 10  │ 0.953753 │ 1 │ c │
+```
+]
+
+--
+
+.pull-right[
+```
+
+10×2 Array{Float64,2}:
+ 1.0  1.0
+ 1.0  3.0
+ 1.0  2.0
+ 1.0  3.0
+ 1.0  1.0
+ 1.0  1.0
+ 1.0  2.0
+ 1.0  2.0
+ 1.0  3.0
+ 1.0  1.0
+```
+]
+
+---
+
+# Data time
+
+Any `<:AbstractTerm` can general model columns from a table:
+
+```julia
+f = apply_schema(@formula(y ~ 1 + a + b), schema(d))
+# right-hand side:
+last(model_cols(f, d))
+```
+
+.pull-left[
+```
+│ Row │ y        │ a │ b │
+├─────┼──────────┼───┼───┤
+│ 1   │ 0.946488 │ 1 │ b │
+│ 2   │ 0.658707 │ 3 │ b │
+│ 3   │ 0.53838  │ 2 │ a │
+│ 4   │ 0.639199 │ 3 │ c │
+│ 5   │ 0.395238 │ 1 │ b │
+│ 6   │ 0.212491 │ 1 │ a │
+│ 7   │ 0.902297 │ 2 │ a │
+│ 8   │ 0.199278 │ 2 │ a │
+│ 9   │ 0.942253 │ 3 │ c │
+│ 10  │ 0.953753 │ 1 │ c │
+```
+]
+
+.pull-right[
+```
+
+10×4 Array{Float64,2}:
+ 1.0  1.0  0.0  0.0
+ 1.0  3.0  0.0  0.0
+ 1.0  2.0  1.0  0.0
+ 1.0  3.0  0.0  1.0
+ 1.0  1.0  0.0  0.0
+ 1.0  1.0  1.0  0.0
+ 1.0  2.0  1.0  0.0
+ 1.0  2.0  1.0  0.0
+ 1.0  3.0  0.0  1.0
+ 1.0  1.0  0.0  1.0
+```
+]
+
+
+---
+
+# Data time
+
+Even a single `Term`
+
+```julia
+t = apply_schema(Term(:b), schema(d))
+model_cols(t, d)
+```
+
+.pull-left[
+```
+│ Row │ y        │ a │ b │
+├─────┼──────────┼───┼───┤
+│ 1   │ 0.946488 │ 1 │ b │
+│ 2   │ 0.658707 │ 3 │ b │
+│ 3   │ 0.53838  │ 2 │ a │
+│ 4   │ 0.639199 │ 3 │ c │
+│ 5   │ 0.395238 │ 1 │ b │
+│ 6   │ 0.212491 │ 1 │ a │
+│ 7   │ 0.902297 │ 2 │ a │
+│ 8   │ 0.199278 │ 2 │ a │
+│ 9   │ 0.942253 │ 3 │ c │
+│ 10  │ 0.953753 │ 1 │ c │
+```
+]
+
+.pull-right[
+```
+
+10×2 Array{Float64,2}:
+ 0.0  0.0
+ 0.0  0.0
+ 1.0  0.0
+ 0.0  1.0
+ 0.0  0.0
+ 1.0  0.0
+ 1.0  0.0
+ 1.0  0.0
+ 0.0  1.0
+ 0.0  1.0
+```
+]
