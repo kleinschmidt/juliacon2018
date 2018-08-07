@@ -184,7 +184,7 @@ julia> terms!(parse!( :(y ~ 1 + a*b) ))
 
 ---
 
-# Non-DSL calls
+# (non-DSL calls)
 
 Calls to non-DSL functions block DSL re-writes:
 
@@ -207,70 +207,37 @@ julia> terms!(:(y ~ 1 + log(a*b)))
                              $(Expr(:quote, :(log(a * b))))))
 ```
 
-
-
-
-
-
-
-
 ---
 
-# How
+# Macro time: `@formula`
 
-## Syntax rewrite
-## Create `Term`s
-
-```julia
-julia> terms!(parse!( :(y ~ 1 + a*b) ))
-:(Term(:y) ~ InterceptTerm{true}() + Term(:a) + Term(:b) + Term(:a) & Term(:b))
-```
-
----
-
-# How
-
-## Syntax rewrite
-## Create `Term`s
-
-```julia
-julia> terms!(parse!( :(y ~ 1 + a*b) ))
-:(Term(:y) ~ InterceptTerm{true}() + Term(:a) + Term(:b) + Term(:a) & Term(:b))
-
-julia> terms!(:(y ~ 1 + log(a*b)))
-:(Term(:y) ~ 
-    InterceptTerm{true}() + 
-    StatsModels.capture_call($(Expr(:escape, :log)), 
-                             ((a, b)->log(a * b)), 
-                             (:a, :b), 
-                             $(Expr(:quote, :(log(a * b))))))
-```
-
----
-
-# How
-
-## Syntax rewrite
-## Create `Term`s
+A macro takes one expression and generates another:
 
 ```julia
 julia> @macroexpand @formula(y ~ 1 + a*b)
 :(Term(:y) ~ InterceptTerm{true}() + Term(:a) + Term(:b) + Term(:a) & Term(:b))
 ```
 
----
+Which is immediately evaluated.
 
-# How
+--
 
-## Syntax rewrite
-## Create `Term`s
-## Operators on `Term`s
+StatsModels.jl defines methods for **DSL operators** for `AbstractTerm`s which
+create **higher-order terms** out of the basics:
 
 ```julia
 Term(:a) + Term(:b) == (Term(:a), Term(:b))
 Term(:a) & Term(:b) == InteractionTerm((Term(:a), Term(:b)))
 (Term(:y) ~ Term(:a)) == FormulaTerm(Term(:y), Term(:a))
 ```
+
+---
+
+
+
+
+
+
 
 ---
 
