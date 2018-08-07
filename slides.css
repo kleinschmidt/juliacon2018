@@ -1,0 +1,10 @@
+.footnote {
+    position: absolute;
+    bottom: 3em;
+    font-size: 75%;
+    color: #888;
+}
+
+.red {
+    color: #f00;
+}

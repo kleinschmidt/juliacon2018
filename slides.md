@@ -261,7 +261,7 @@ A `schema` captures all the necessary invariants to do these transformations
 
 # Schema time
 
-A schema is a mapping from `Term`s to `CategoricalTerm`/`ContinuousTerm`s:
+A schema<sup>.red[*]</sup> is a mapping from `Term`s to `CategoricalTerm`/`ContinuousTerm`s:
 
 ```julia
 julia> d = (y=rand(10), a=sample(1:3, 10), b=sample([:a, :b, :c], 10));
@@ -273,7 +273,7 @@ Dict{Any,Any} with 3 entries:
   y => y (continuous)
 ```
 
-.footnote[Inspired by [JuliaDB.ML](https://github.com/JuliaComputing/JuliaDB.jl)]
+.footnote[.red[*] Inspired by [JuliaDB.ML](https://github.com/JuliaComputing/JuliaDB.jl)]
 
 --
 
