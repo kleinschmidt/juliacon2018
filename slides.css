@@ -1,3 +1,12 @@
+body { font-family: 'Droid Serif'; }
+h1, h2, h3 {
+    font-family: 'Yanone Kaffeesatz', 'Impact';
+    font-weight: normal;
+}
+.remark-code, .remark-inline-code {
+    font-family: /* 'Ubuntu Mono', */ 'Meslo', 'monospace';
+}
+
 .footnote {
     position: absolute;
     bottom: 3em;
@@ -7,4 +16,16 @@
 
 .red {
     color: #f00;
+}
+
+.pull-left {
+    float: left;
+    width: 47%;
+}
+.pull-right {
+    float: right;
+    width: 47%;
+}
+.pull-right ~ p {
+    clear: both;
 }
