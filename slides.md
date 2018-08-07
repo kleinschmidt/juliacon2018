@@ -184,6 +184,30 @@ julia> terms!(parse!( :(y ~ 1 + a*b) ))
 
 ---
 
+# Macro time: `@formula`
+
+A macro takes one expression and generates another:
+
+```julia
+julia> @macroexpand @formula(y ~ 1 + a*b)
+:(Term(:y) ~ InterceptTerm{true}() + Term(:a) + Term(:b) + Term(:a) & Term(:b))
+```
+
+Which is immediately evaluated.
+
+--
+
+StatsModels.jl defines methods for **DSL operators** for `AbstractTerm`s which
+create **higher-order terms** out of the basics:
+
+```julia
+Term(:a) + Term(:b) == (Term(:a), Term(:b))
+Term(:a) & Term(:b) == InteractionTerm((Term(:a), Term(:b)))
+(Term(:y) ~ Term(:a)) == FormulaTerm(Term(:y), Term(:a))
+```
+
+---
+
 # (non-DSL calls)
 
 Calls to non-DSL functions block DSL re-writes:
@@ -209,74 +233,61 @@ julia> terms!(:(y ~ 1 + log(a*b)))
 
 ---
 
-# Macro time: `@formula`
+# Schema time
 
-A macro takes one expression and generates another:
+Two basic kinds of variables: **continuous** (`<:Number`) and **categorical**
+(`String`, `Symbol`, etc.)
 
-```julia
-julia> @macroexpand @formula(y ~ 1 + a*b)
-:(Term(:y) ~ InterceptTerm{true}() + Term(:a) + Term(:b) + Term(:a) & Term(:b))
-```
+???
 
-Which is immediately evaluated.
+A `Term` by itself is just a placeholder: a pointer to some hypothetical column
+in table we haven't seen yet. It could be a vector of floats, or ints, or
+strings, we don't know at this point.  And how we actually _handle_ that data is
+doing to depend on the types and on some additional invariants (like the
+particular levels of categorical variables)
 
 --
 
-StatsModels.jl defines methods for **DSL operators** for `AbstractTerm`s which
-create **higher-order terms** out of the basics:
+**Continuous** variables are **converted** (to `Float64` etc.)
 
-```julia
-Term(:a) + Term(:b) == (Term(:a), Term(:b))
-Term(:a) & Term(:b) == InteractionTerm((Term(:a), Term(:b)))
-(Term(:y) ~ Term(:a)) == FormulaTerm(Term(:y), Term(:a))
-```
+**Categorical** variables need to be **encoded** (one-hot coding, contrast coding, etc.)
+which depends on the **unique values**
 
----
-
-
-
-
-
-
-
----
-
-```julia
-julia> f = @formula(y ~ 1 + a*b)
-y ~ 1 + a + b + a&b
-```
 --
-```julia
-julia> dump(f)
-FormulaTerm{Term,Tuple{InterceptTerm{true},Term,Term,InteractionTerm{Tuple{Term,Term}}}}
-  lhs: Term
-    sym: Symbol y
-  rhs: Tuple{InterceptTerm{true},Term,Term,InteractionTerm{Tuple{Term,Term}}}
-    1: InterceptTerm{true} 1
-    2: Term
-      sym: Symbol a
-    3: Term
-      sym: Symbol b
-    4: InteractionTerm{Tuple{Term,Term}}
-      terms: Tuple{Term,Term}
-        1: Term
-          sym: Symbol a
-        2: Term
-          sym: Symbol b
-```
+
+A `schema` captures all the necessary invariants to do these transformations
 
 ---
 
-# How
+# Schema time
 
-## Make schema
-
-A schema maps `Term`s to `ContinuousTerm` or `CategoricalTerm` and their summary
-statistics.
+A schema is a mapping from `Term`s to `CategoricalTerm`/`ContinuousTerm`s:
 
 ```julia
+julia> d = (y=rand(10), a=sample(1:3, 10), b=sample([:a, :b, :c], 10));
 
+julia> schema(d)
+Dict{Any,Any} with 3 entries:
+  a => a (continuous)
+  b => b (categorical(2): DummyCoding)
+  y => y (continuous)
 ```
+
+.footnote[Inspired by [JuliaDB.ML](https://github.com/JuliaComputing/JuliaDB.jl)]
+
+--
+
+```julia
+julia> schema(d, Dict(:a=>CategoricalTerm, :b=>HelmertCoding()))
+Dict{Any,Any} with 3 entries:
+  a => a (categorical(2): DummyCoding)
+  b => b (categorical(2): HelmertCoding)
+  y => y (continuous)
+```
+
+--
+
+
 
 ---
 
