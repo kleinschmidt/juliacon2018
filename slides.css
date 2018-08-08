@@ -8,6 +8,24 @@ h1, h2, h3 {
     font-size: 80%;
 }
 
+a {
+    text-decoration: none;
+}
+
+.slide-title h1 {
+    font-size: 80px;
+}
+
+.slide-title h3 {
+    font-size: 24px;
+    color: #888;
+}
+
+.slide-title h2 {
+    font-size: 24px;
+    color: #666;
+}
+
 .footnote {
     position: absolute;
     bottom: 3em;

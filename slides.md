@@ -1,9 +1,15 @@
-class: center, middle
-tilte: title
+class: middle
 
-# A `@formula` for Bridging the Table-Matrix Divide
+.slide-title[
 
-## Dave Kleinschmidt
+# A `@formula` for bridging the **table-matrix** divide
+
+## .author[Dave Kleinschmidt — `@kleinschmidt`]
+
+### .affiliation[Princeton Neuroscience Institute/Rutgers University]
+### .venue[JuliaCon 2018]
+
+]
 
 ---
 
