@@ -271,6 +271,8 @@ Dict{Any,Any} with 3 entries:
 
 --
 
+Override defaults with a `Dict` of _hints_
+
 ```julia
 julia> schema(d, Dict(:a=>CategoricalTerm, :b=>HelmertCoding()))
 Dict{Any,Any} with 3 entries:
