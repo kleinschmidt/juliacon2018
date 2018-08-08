@@ -18,6 +18,10 @@ h1, h2, h3 {
     color: #f00;
 }
 
+.dim {
+    color: #888;
+}
+
 .pull-left {
     float: left;
     width: 47%;

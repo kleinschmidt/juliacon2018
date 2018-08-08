@@ -68,17 +68,18 @@ multiple stages.  `@formula` supports generic Julia code expressions.
 
 ---
 
-# Today
+# What is a `@formula`
 
-## What is a `@formula`
+Compact language to describe how to **organize** and **transform** tabular data
+for modeling
 
-## How do they work
+# .dim[How do they work]
 
-## How to extend
+# .dim[How to extend]
 
 ---
 
-## Organize
+<h1>Organize .dim[and transform]</h1>
 
 ### Separate response and predictors
 
@@ -88,7 +89,7 @@ What is the effect of `a` on `y`?
 
 ---
 
-## Organize
+<h1>Organize .dim[and transform]</h1>
 
 ### Combine multiple variables
 
@@ -98,7 +99,7 @@ What is the effect of `a` _and_ `b` on `y`?
 
 ---
 
-## Transform
+<h1>.dim[Organize and] transform</h1>
 
 ### Interactions of terms
 
@@ -108,7 +109,7 @@ How much does the effect of `a` vary with `b`?
 
 ---
 
-## Transform
+<h1>.dim[Organize and] transform</h1>
 
 ### Interactions of terms
 
@@ -118,7 +119,7 @@ How much does the effect of `a` vary with `b`?
 
 ---
 
-## Transform
+# .dim[Organize and] transform
 
 ### Other, specialzed transformations
 
@@ -130,26 +131,19 @@ Effect of `a` varies by `subject`
 
 ---
 
-# What
+# .dim[What is a `@formula`]
 
-## Example
-
-```julia
-
-```
-
----
-
-# How
+# How do they work
 
 1. Macro time (surface syntax)
 2. Schema time (types and some invariants)
 3. Data time (a complete table or row)
 
+# .dim[How to extend]
+
 ???
 
 There are three distinct stages:
-
 
 ---
 
@@ -219,7 +213,7 @@ julia> parse!(:(y ~ 1 + a*b + log(a*b)))
 
 --
 
-And lower to `capture_call`:
+And lower to `capture_call` which generates a `FunctionTerm` when evaluated
 
 ```julia
 julia> terms!(:(y ~ 1 + log(a*b)))
@@ -451,3 +445,125 @@ model_cols(t, d)
  0.0  1.0
 ```
 ]
+
+---
+
+# Data time
+
+Non-special calls are evaluated elementwise:
+
+```julia
+f = apply_schema(@formula(y ~ 1 + a + log(a) + a^2), schema(d))
+# right-hand side:
+last(model_cols(f, d))
+```
+
+.pull-left[
+```
+│ Row │ y        │ a │ b │
+├─────┼──────────┼───┼───┤
+│ 1   │ 0.946488 │ 1 │ b │
+│ 2   │ 0.658707 │ 3 │ b │
+│ 3   │ 0.53838  │ 2 │ a │
+│ 4   │ 0.639199 │ 3 │ c │
+│ 5   │ 0.395238 │ 1 │ b │
+│ 6   │ 0.212491 │ 1 │ a │
+│ 7   │ 0.902297 │ 2 │ a │
+│ 8   │ 0.199278 │ 2 │ a │
+│ 9   │ 0.942253 │ 3 │ c │
+│ 10  │ 0.953753 │ 1 │ c │
+```
+]
+
+.pull-right[
+```
+
+10×4 Array{Float64,2}:
+ 1.0  1.0  0.0       1.0
+ 1.0  3.0  1.09861   9.0
+ 1.0  2.0  0.693147  4.0
+ 1.0  3.0  1.09861   9.0
+ 1.0  1.0  0.0       1.0
+ 1.0  1.0  0.0       1.0
+ 1.0  2.0  0.693147  4.0
+ 1.0  2.0  0.693147  4.0
+ 1.0  3.0  1.09861   9.0
+ 1.0  1.0  0.0       1.0
+```
+]
+
+---
+
+# .dim[What is a `@formula`]
+
+# .dim[How do they work]
+
+# How to extend
+
+Can define custom behavior at
+
+1. Macro time (custom operators/syntax)
+2. Schema time (custom data types)
+3. Data time (custom outputs/transformations)
+
+---
+
+# Random effects terms
+
+[MixedModels.jl](https://github.com/dmbates/MixedModels.jl) package fits
+regression models that include "random effects":
+
+`y ~ 1 + a + b + (1 + a | subject)`
+
+Each level of `subject` has a different overall baseline (`1`) and effect for
+`a`.
+
+```julia
+mutable struct RanefTerm{Ts,G} <: AbstractTerm
+    terms::Ts
+    group::G
+end
+
+# Generate Terms for arguments of | in @formula
+StatsModels.is_special(::Val{:|}) = true
+# Combine Term arguments of | into RanefTerm
+Base.:|(lhs::TermOrTerms, rhs::Term) = RanefTerm(lhs, rhs)
+```
+
+```julia-repl
+julia> @formula(y ~ 1 + a + (1 + a | b))
+y ~ 1 + a + RanefTerm{Tuple{InterceptTerm{true},Term},Term}(1 + a, b)
+```
+
+
+---
+
+# Random effects terms
+
+## Schema time
+
+```julia
+StatsModels.terms(r::RanefTerm) = r.terms
+StatsModels.apply_schema(r::RanefTerm, schema) = 
+    RanefTerm(apply_schema(r.terms), r.group)
+```
+
+## Data time
+
+Don't include ranef terms in the normal model matrix:
+
+```julia
+StatsModels.model_cols(::RanefTerm, data) = []
+```
+
+
+---
+
+# Wrapping up
+
+Julia features:
+
+* Multiple dispatch/generic functions (Add functionality by dispatching on
+  `Term`s, schema wrappers, etc.)
+* Fast anonymous functions (mix in normal julia code in `@formula`)
+* NamedTuples (support anything that supports DataStreams/IterableTables)
