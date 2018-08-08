@@ -202,14 +202,17 @@ Which is immediately evaluated.
 
 --
 
-StatsModels.jl defines methods for **DSL operators** for `AbstractTerm`s which
-create **higher-order terms** out of the basics:
+StatsModels.jl<sup>.red[*]</sup> defines methods for __DSL operators__ for
+`AbstractTerm`s which create __higher-order terms__ out of the basics:
 
 ```julia
 Term(:a) + Term(:b) == (Term(:a), Term(:b))
 Term(:a) & Term(:b) == InteractionTerm((Term(:a), Term(:b)))
 (Term(:y) ~ Term(:a)) == FormulaTerm(Term(:y), Term(:a))
 ```
+
+.footnote[.red[*] [#71 Terms 2.0: Son of
+Terms](https://github.com/JuliaStats/StatsModels.jl/pull/71)]
 
 ---
 
@@ -296,8 +299,8 @@ Dict{Any,Any} with 3 entries:
 
 # Schema time
 
-A schema applied to an `<:AbstractTerm` formula replaces `Term`s with their
-schema entries:
+A schema applied to an `<:AbstractTerm` replaces `Term`s with their schema
+entries:
 
 ```julia
 julia> apply_schema(@formula(y ~ 1 + a + b), schema(d))
