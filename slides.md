@@ -511,6 +511,21 @@ last(model_cols(f, d))
 
 ---
 
+# Data time
+
+Everything works with single rows as well (just need schema)
+
+```julia
+f = apply_schema(@formula(y ~ 1 + a*b), schema(d))
+model_cols(f, (y=10.0, a=2, b=:c))
+```
+
+```
+(10.0, [1.0, 2.0, 0.0, 1.0, 0.0, 2.0])
+```
+
+---
+
 # .dim[What is a `@formula`]
 
 # .dim[How does it work]
@@ -551,7 +566,6 @@ Base.:|(lhs::TermOrTerms, rhs::Term) = RanefTerm(lhs, rhs)
 julia> @formula(y ~ 1 + a + (1 + a | b))
 y ~ 1 + a + RanefTerm{Tuple{InterceptTerm{true},Term},Term}(1 + a, b)
 ```
-
 
 ---
 
