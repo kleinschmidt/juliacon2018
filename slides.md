@@ -4,10 +4,10 @@ class: middle
 
 # A `@formula` for bridging the **table-matrix** divide
 
-## .author[Dave Kleinschmidt — `@kleinschmidt`]
+## Dave Kleinschmidt — `@kleinschmidt`
 
-### .affiliation[Princeton Neuroscience Institute/Rutgers University]
-### .venue[JuliaCon 2018]
+### Princeton Neuroscience Institute/Rutgers University
+### JuliaCon 2018
 
 ]
 
