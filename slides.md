@@ -28,14 +28,6 @@ need numeric arrays of one kind or another.
 
 ---
 
-# Why
-
-???
-
-An example: regression modeling
-
----
-
 # What
 
 [StatsModels.jl](https://github.com/JuliaStats/StatsModels.jl) provides tools to
@@ -56,21 +48,28 @@ Historically: lived in DataFrames. (new slide???)
 
 --
 
-The **`@formula`** domain-specific language (DSL): high-level specification of
+The **`@formula` domain-specific language** (DSL): high-level specification of
 table-to-matrix transformations
 
 --
 
-A **`ModelFrame`** encapsulates a formula applied to a particular tabular dataset.
+**Past**: 
+
+* Part of `DataFrames`.
+* Hard to extend. 
+* `@formula` limited to DSL.
 
 --
 
-**Past**: Part of `DataFrames`.  Hard to extend.  `@formula` limited to DSL.
+**Future**: 
+
+* Backend-agnostic (streaming or columnar store).
+* Extensible at multiple stages.
+* Generic Julia code in `@formula` expressions.
 
 --
 
-**Future**: Backend-agnostic (streaming or columnar store).  Extensible at
-multiple stages.  `@formula` supports generic Julia code expressions.
+**Present**: [JuliaStats/StatsModels.jl#71 **Terms 2.0: Son of Terms**](https://github.com/JuliaStats/StatsModels.jl/pull/71)
 
 ---
 
@@ -79,7 +78,7 @@ multiple stages.  `@formula` supports generic Julia code expressions.
 Compact language to describe how to **organize** and **transform** tabular data
 for modeling
 
-# .dim[How do they work]
+# .dim[How does it work]
 
 # .dim[How to extend]
 
@@ -119,7 +118,7 @@ How much does the effect of `a` vary with `b`?
 
 ### Interactions of terms
 
-`y ~ a + b + a&b` ← `y ~ a*b`
+`y ~ a + b + a&b == y ~ a*b`
 
 How much does the effect of `a` vary with `b`?
 
@@ -127,19 +126,25 @@ How much does the effect of `a` vary with `b`?
 
 # .dim[Organize and] transform
 
-### Other, specialzed transformations
+### Other, specialzed transformations<sup>.red[*]</sup>
 
-_Mixed-effects_ regression:
+_Mixed-effects_ regression (effect of `a` **varies by `subject`**):
 
 `y ~ a*b + (a | subject)`
 
-Effect of `a` varies by `subject`
+.footnote[.red[*] Hypothetical!]
+
+--
+
+_B-spline_ regression (**nonlinear** effect of `a`)
+
+`y ~ bs(a, df=7) * b`
 
 ---
 
 # .dim[What is a `@formula`]
 
-# How do they work
+# How does it work
 
 1. Macro time (surface syntax)
 2. Schema time (types and some invariants)
@@ -273,7 +278,7 @@ Dict{Any,Any} with 3 entries:
   y => y (continuous)
 ```
 
-.footnote[.red[*] Inspired by [JuliaDB.ML](https://github.com/JuliaComputing/JuliaDB.jl)]
+.footnote[.red[*] ~~Inspired by~~ shamelessly stolen from [JuliaDB.ML](https://github.com/JuliaComputing/JuliaDB.jl)]
 
 --
 
@@ -291,7 +296,8 @@ Dict{Any,Any} with 3 entries:
 
 # Schema time
 
-A schema applied to a formula replaces `Term`s with their schema entries:
+A schema applied to an `<:AbstractTerm` formula replaces `Term`s with their
+schema entries:
 
 ```julia
 julia> apply_schema(@formula(y ~ 1 + a + b), schema(d))
@@ -504,7 +510,7 @@ last(model_cols(f, d))
 
 # .dim[What is a `@formula`]
 
-# .dim[How do they work]
+# .dim[How does it work]
 
 # How to extend
 
