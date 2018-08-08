@@ -5,6 +5,7 @@ h1, h2, h3 {
 }
 .remark-code, .remark-inline-code {
     font-family: /* 'Ubuntu Mono', */ 'Meslo', 'monospace';
+    font-size: 80%;
 }
 
 .footnote {
