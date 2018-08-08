@@ -587,12 +587,92 @@ Don't include ranef terms in the normal model matrix:
 StatsModels.model_cols(::RanefTerm, data) = []
 ```
 
+Construct `ReMat` struct from data using terms:
+
+```julia
+ReMat(r::RanefTerm, d::Data.Table) = ReMat(model_cols(r.terms, d), d[r.groups.sym])
+```
+
+---
+
+# Extending: Polynomial regression
+
+```julia
+mutable struct PolyTerm <: AbstractTerm
+    term::AbstractTerm
+    degree::Int
+end
+```
+
+## Macro time
+
+First approach: make `poly` a special function (currently does not work because
+of how literal numbers are handled):
+
+```julia
+StatsModels.is_special(::Val{:poly}) = true
+poly(t::Term, deg::Int) = PolyTerm(t, deg)
+```
+
+Second approach: use `capture_call` to intercept non-special call
+
+```julia
+StatsModels.capture_call(::typeof(poly), fanon, names, ex) = poly(Term(ex.args[2], ex.args[3]))
+```
+
+(if function `poly` is defined!)
+
+---
+
+# Extending: Polynomial regression
+
+## Schema time
+
+```julia
+StatsModels.terms(p::PolyTerm) = p.term
+StatsModels.apply_schema(p::PolyTerm, sch) =
+    PolyTerm(apply_schema(p.term, sch), p.degree)
+```
+
+## Data time
+
+```julia
+function StatsModels.model_cols(p::PolyTerm, d::NamedTuple)
+    col = model_cols(p.term, d)
+    hcat((col.^n for n in 1:p.degree)...)
+end
+```
+
+---
+
+# Extending: Polynomial regression
+
+```julia
+julia> f = apply_schema(@formula(y ~ 1 + poly(a, 3)), schema(d))
+y (continuous) ~ 1 + PolyTerm(a (continuous), 3)
+
+julia> model_cols(f, cols) |> last
+10×4 Array{Float64,2}:
+ 1.0  1.0  1.0   1.0
+ 1.0  3.0  9.0  27.0
+ 1.0  2.0  4.0   8.0
+ 1.0  1.0  1.0   1.0
+ 1.0  3.0  9.0  27.0
+ 1.0  3.0  9.0  27.0
+ 1.0  1.0  1.0   1.0
+ 1.0  3.0  9.0  27.0
+ 1.0  1.0  1.0   1.0
+ 1.0  1.0  1.0   1.0
+```
 
 ---
 
 # Wrapping up
 
-Julia features:
+StatsModels.jl provides the `@formula` DSL to transform tabular data into
+numerical matrices for modeling
+
+Take advantage of Julia's features to be both **composable** & **performant** 
 
 * Multiple dispatch/generic functions (Add functionality by dispatching on
   `Term`s, schema wrappers, etc.)
