@@ -126,6 +126,16 @@ How much does the effect of `a` vary with `b`?
 
 # .dim[Organize and] transform
 
+### Element-wise functions of terms .red[**(NEW!)**] 
+
+`y ~ log(a)`
+
+What's the effect of log-transformed `a` on y?
+
+---
+
+# .dim[Organize and] transform
+
 ### Other, specialzed transformations<sup>.red[*]</sup>
 
 _Mixed-effects_ regression (effect of `a` **varies by `subject`**):
