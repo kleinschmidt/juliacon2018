@@ -7,7 +7,7 @@ class: middle
 ## Dave Kleinschmidt — `@kleinschmidt`
 
 ### Princeton Neuroscience Institute/Rutgers University
-### JuliaCon 2018
+### JuliaCon 2018 — [`tiny.cc/formula-jl`](http://tiny.cc/formula-jl)
 
 ]
 
