@@ -80,7 +80,7 @@ for modeling
 
 # .dim[How does it work]
 
-# .dim[How to extend]
+# .dim[But I want more]
 
 ---
 
@@ -150,7 +150,7 @@ _B-spline_ regression (**nonlinear** effect of `a`)
 2. Schema time (types and some invariants)
 3. Data time (a complete table or row)
 
-# .dim[How to extend]
+# .dim[But I want more]
 
 ???
 
@@ -530,7 +530,7 @@ model_cols(f, (y=10.0, a=2, b=:c))
 
 # .dim[How does it work]
 
-# How to extend
+# But I want more
 
 Can define custom behavior at
 
