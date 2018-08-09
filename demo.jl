@@ -1,3 +1,4 @@
+
 using StatsModels, StatsBase, DataStreams, DataFrames, Random
 
 Random.seed!(1);
@@ -13,14 +14,18 @@ apply_schema(f, schema(d))
 
 model_cols(apply_schema(f, schema(d)), cols) |> last
 
+model_cols(apply_schema(@formula(y ~ 1 + a + log(a)), schema(d)), cols) |> last
 
-# Polynomial regression
+
+
+
+# polynomial regression ########################################################
 mutable struct PolyTerm <: AbstractTerm
     term::AbstractTerm
     degree::Int
 end
 
-# Macro time
+# Macro time #################
 # first approach: (DOESN'T WORK currently because of numbers)
 is_special(::Val{:poly}) = true
 poly(t::Term, n::Int) = PolyTerm(t, n)
@@ -30,17 +35,19 @@ function poly end
 StatsModels.capture_call(::typeof(poly), fanon, names, ex) =
     poly(Term(ex.args[2]), ex.args[3])
 
-# Schema time
+# Schema time ################
 StatsModels.terms(p::PolyTerm) = p.term
 StatsModels.apply_schema(p::PolyTerm, sch) =
     PolyTerm(apply_schema(p.term, sch), p.degree)
 
-# Data time
+# Data time ##################
 function StatsModels.model_cols(p::PolyTerm, d::NamedTuple)
     col = model_cols(p.term, d)
     hcat((col.^n for n in 1:p.degree)...)
 end
 
+import StatsModels: termnames
+termnames(p::PolyTerm) = [termnames(p.term) * "^$n" for n in 1:p.degree]
 
 f = apply_schema(@formula(y ~ 1 + poly(a, 3)), schema(d))
 # y (continuous) ~ 1 + PolyTerm(a (continuous), 3)
