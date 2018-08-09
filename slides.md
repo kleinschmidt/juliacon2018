@@ -560,6 +560,8 @@ StatsModels.is_special(::Val{:poly}) = true
 poly(t::Term, deg::Int) = PolyTerm(t, deg)
 ```
 
+--
+
 Second approach: use `capture_call` to intercept call expression
 
 ```julia
