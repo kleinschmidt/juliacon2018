@@ -685,3 +685,10 @@ Take advantage of Julia's features to be both **composable** & **performant**
   `Term`s, schema wrappers, etc.)
 * Fast anonymous functions (mix in normal julia code in `@formula`)
 * NamedTuples (support anything that supports DataStreams/IterableTables)
+
+--
+
+# Thanks
+
+* Doug Bates + JuliaStats contributors
+* Princeton Neuroscience Institute & CV Starr Foundation
