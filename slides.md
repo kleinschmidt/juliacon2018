@@ -540,60 +540,6 @@ Can define custom behavior at
 
 ---
 
-# Random effects terms
-
-[MixedModels.jl](https://github.com/dmbates/MixedModels.jl) package fits
-regression models that include "random effects":
-
-`y ~ 1 + a + b + (1 + a | subject)`
-
-Each level of `subject` has a different overall baseline (`1`) and effect for
-`a`.
-
-```julia
-mutable struct RanefTerm{Ts,G} <: AbstractTerm
-    terms::Ts
-    group::G
-end
-
-# Generate Terms for arguments of | in @formula
-StatsModels.is_special(::Val{:|}) = true
-# Combine Term arguments of | into RanefTerm
-Base.:|(lhs::TermOrTerms, rhs::Term) = RanefTerm(lhs, rhs)
-```
-
-```julia-repl
-julia> @formula(y ~ 1 + a + (1 + a | b))
-y ~ 1 + a + RanefTerm{Tuple{InterceptTerm{true},Term},Term}(1 + a, b)
-```
-
----
-
-# Random effects terms
-
-## Schema time
-
-```julia
-StatsModels.terms(r::RanefTerm) = r.terms
-StatsModels.apply_schema(r::RanefTerm, schema) = 
-    RanefTerm(apply_schema(r.terms), r.group)
-```
-
-## Data time
-
-Don't include ranef terms in the normal model matrix:
-
-```julia
-StatsModels.model_cols(::RanefTerm, data) = []
-```
-
-Construct `ReMat` struct from data using terms:
-
-```julia
-ReMat(r::RanefTerm, d::Data.Table) = ReMat(model_cols(r.terms, d), d[r.groups.sym])
-```
-
----
 
 # Extending: Polynomial regression
 
@@ -614,10 +560,11 @@ StatsModels.is_special(::Val{:poly}) = true
 poly(t::Term, deg::Int) = PolyTerm(t, deg)
 ```
 
-Second approach: use `capture_call` to intercept non-special call
+Second approach: use `capture_call` to intercept call expression
 
 ```julia
-StatsModels.capture_call(::typeof(poly), fanon, names, ex) = poly(Term(ex.args[2], ex.args[3]))
+StatsModels.capture_call(::typeof(poly), fanon, names, ex) =
+    poly(Term(ex.args[2], ex.args[3]))
 ```
 
 (if function `poly` is defined!)
@@ -633,6 +580,8 @@ StatsModels.terms(p::PolyTerm) = p.term
 StatsModels.apply_schema(p::PolyTerm, sch) =
     PolyTerm(apply_schema(p.term, sch), p.degree)
 ```
+
+--
 
 ## Data time
 
@@ -663,6 +612,62 @@ julia> model_cols(f, cols) |> last
  1.0  3.0  9.0  27.0
  1.0  1.0  1.0   1.0
  1.0  1.0  1.0   1.0
+```
+
+---
+
+# Extending: Random effects terms
+
+[MixedModels.jl](https://github.com/dmbates/MixedModels.jl) package fits
+regression models that include "random effects":
+
+`y ~ 1 + a + b + (1 + a | subject)`
+
+Each level of `subject` has a different overall baseline (`1`) and effect for
+`a`.
+
+```julia
+mutable struct RanefTerm{Ts,G} <: AbstractTerm
+    terms::Ts
+    group::G
+end
+
+# Generate Terms for arguments of | in @formula
+StatsModels.is_special(::Val{:|}) = true
+# Combine Term arguments of | into RanefTerm
+Base.:|(lhs::TermOrTerms, rhs::Term) = RanefTerm(lhs, rhs)
+```
+
+```julia-repl
+julia> @formula(y ~ 1 + a + (1 + a | b))
+y ~ 1 + a + RanefTerm{Tuple{InterceptTerm{true},Term},Term}(1 + a, b)
+```
+
+---
+
+# Extending: Random effects terms
+
+## Schema time
+
+```julia
+StatsModels.terms(r::RanefTerm) = r.terms
+StatsModels.apply_schema(r::RanefTerm, schema) = 
+    RanefTerm(apply_schema(r.terms), r.group)
+```
+
+## Data time
+
+Don't include ranef terms in the normal model matrix:
+
+```julia
+StatsModels.model_cols(::RanefTerm, data) = []
+```
+
+Construct `ReMat` struct from data using terms:
+
+```julia
+ReMat(r::RanefTerm, d::Data.Table) = 
+    ReMat(model_cols(r.terms, d), d[r.groups.sym])
 ```
 
 ---
