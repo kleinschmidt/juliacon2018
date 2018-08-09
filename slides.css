@@ -8,6 +8,10 @@ h1, h2, h3 {
     font-size: 80%;
 }
 
+.remark-code.julia.hljs {
+    overflow-x: hidden;
+}
+
 a {
     text-decoration: none;
 }
